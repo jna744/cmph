@@ -1,0 +1,15 @@
+---
+BasedOnStyle: Chromium
+---
+Language: Cpp
+Standard: Auto
+AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakAfterReturnType: None
+EmptyLineAfterAccessModifier: Always
+EmptyLineBeforeAccessModifier: Always
+PenaltyReturnTypeOnItsOwnLine: 1000
+BreakBeforeBraces: Allman
+IncludeBlocks: Regroup
+ColumnLimit: 100
+AllowShortLambdasOnASingleLine: Inline
+LambdaBodyIndentation: OuterScope
