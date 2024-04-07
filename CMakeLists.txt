@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(cmph)
 
-set(CMAKE_CXX_STANDARD 20)
-
 option(CMPH_TEST "Build cmph tests" On) # Todo
 option(CMPH_BENCH "Build cmph benchmark" On)
 
@@ -26,6 +24,7 @@ if (CMPH_BENCH)
     endif()
     add_executable(bench bench.cpp)
     target_link_libraries(bench benchmark::benchmark cmph)
+    set_property(TARGET bench PROPERTY CXX_STANDARD 20)
 endif()
 
 
