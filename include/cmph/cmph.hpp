@@ -2,6 +2,7 @@
 #define CMPH_CMPH_HPP
 
 #include <array>
+#include <stdexcept>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -463,17 +464,37 @@ class Map
 
  public:
 
+  using key_type = std::string_view;
   using mapped_type = typename detail::MappedTypeHelper<T>::Type;
   using value_type = typename Container::value_type;
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
+  using hasher = typename LUT::Policy::Hash;
+  using key_equal = typename LUT::Policy::KeyCompare;
+  using reference = value_type&;
+  using const_reference = value_type const&;
   using pointer = value_type*;
   using const_pointer = value_type const*;
   using iterator = pointer;
   using const_iterator = const_pointer;
 
   [[nodiscard]] constexpr bool empty() const noexcept { return false; }
-  [[nodiscard]] constexpr std::size_t size() const noexcept { return values_.size(); }
+  [[nodiscard]] constexpr std::size_t size() const noexcept { return N; }
+  [[nodiscard]] constexpr std::size_t max_size() const noexcept { return N; }
+
+  constexpr reference at(std::string_view key) { return atImpl(*this, key); }
+  constexpr const_reference at(std::string_view key) const { return atImpl(*this, key); }
+
+  constexpr iterator find(std::string_view key) noexcept { return findImpl(*this, key); }
+  constexpr const_iterator find(std::string_view key) const noexcept
+  {
+    return findImpl(*this, key);
+  }
+
+  [[nodiscard]] constexpr bool contains(std::string_view key) const noexcept
+  {
+    return findImpl(*this, key) != end();
+  }
 
   constexpr iterator begin() noexcept { return values_.begin(); }
   constexpr iterator end() noexcept { return values_.end(); }
@@ -481,23 +502,31 @@ class Map
   constexpr const_iterator begin() const noexcept { return values_.begin(); }
   constexpr const_iterator end() const noexcept { return values_.end(); }
 
-  constexpr iterator find(std::string_view key) noexcept
-  {
-    auto index = LUT::indexOf(key);
-    return begin() + index;
-  }
-  constexpr const_iterator find(std::string_view key) const noexcept
-  {
-    auto index = LUT::indexOf(key);
-    return begin() + index;
-  }
+  constexpr const_iterator cbegin() const noexcept { return values_.begin(); }
+  constexpr const_iterator cend() const noexcept { return values_.end(); }
 
-  [[nodiscard]] constexpr bool contains(std::string_view key) const noexcept
-  {
-    return find(key) != end();
-  }
+  constexpr hasher hash_function() const { return hasher{}; }
+  constexpr key_equal key_eq() const { return key_equal{}; }
 
  private:
+
+  template <typename Self>
+  static constexpr auto findImpl(Self&& self, std::string_view key) noexcept
+  {
+    auto index = LUT::indexOf(key);
+    return self.begin() + index;
+  }
+
+  template <typename Self>
+  static constexpr auto& atImpl(Self&& self, std::string_view key)
+  {
+    auto iter = findImpl(self, key);
+    if (iter != self.end())
+    {
+      return *iter;
+    }
+    throw std::out_of_range("Map::at");
+  }
 
   friend detail::MapFactory;
 
