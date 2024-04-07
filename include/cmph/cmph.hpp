@@ -482,8 +482,8 @@ class Map
   [[nodiscard]] constexpr std::size_t size() const noexcept { return N; }
   [[nodiscard]] constexpr std::size_t max_size() const noexcept { return N; }
 
-  constexpr reference at(std::string_view key) { return atImpl(*this, key); }
-  constexpr const_reference at(std::string_view key) const { return atImpl(*this, key); }
+  constexpr mapped_type& at(std::string_view key) { return atImpl(*this, key); }
+  constexpr mapped_type const& at(std::string_view key) const { return atImpl(*this, key); }
 
   constexpr iterator find(std::string_view key) noexcept { return findImpl(*this, key); }
   constexpr const_iterator find(std::string_view key) const noexcept
@@ -523,7 +523,14 @@ class Map
     auto iter = findImpl(self, key);
     if (iter != self.end())
     {
-      return *iter;
+      if constexpr (detail::IsInstanceOf<T, Pair>::value)
+      {
+        return iter->second;
+      }
+      else
+      {
+        return *iter;
+      }
     }
     throw std::out_of_range("Map::at");
   }

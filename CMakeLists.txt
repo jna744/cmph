@@ -14,6 +14,11 @@ target_include_directories(cmph INTERFACE
         $<INSTALL_INTERFACE:include>
 )
 
+if (CMPH_TEST)
+    enable_testing()
+    add_subdirectory(test)
+endif()
+
 if (CMPH_BENCH)
     find_package(benchmark)
     if (NOT benchmark_FOUND)
@@ -22,8 +27,5 @@ if (CMPH_BENCH)
     add_executable(bench bench.cpp)
     target_link_libraries(bench benchmark::benchmark cmph)
 endif()
-
-add_executable(main main.cpp)
-target_link_libraries(main cmph)
 
 
